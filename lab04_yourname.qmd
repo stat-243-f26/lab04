@@ -1,0 +1,224 @@
+---
+title: "Regression Competition"
+subtitle: "Stat 243: Lab 4"
+author: "Insert Your Name Here"
+format: pdf
+editor: source
+---
+
+## Due: Friday, Oct 9th, 11am PT.
+
+## Instructions
+
+Problem sets are a (nearly) weekly opportunity to engage with ideas relevant to content taught so far in the course. As your are working through your problem set, make sure to "Render" the document early and often. Take a look at the PDF output, as this is what you will turn in on Gradescope. Make sure the output is fully readable and is something that you are proud of. Take care to make sure code, writing, and headers are formatted neatly and presentably. 
+
+## Collaborators
+
+I collaborated with... (list names of collaborators here).
+
+
+## Goals of this problem set
+
+* Review concepts of bootstrapping, cross-validation, and model selection.
+* Hone your model building skills.
+
+**You are not allowed to use any generative AI models (like ChatGPT) on your problem set.**
+
+**The Honor Principle must guide your work on this problem set.**
+
+
+## Problem 0: Load packages
+
+Load any relevant packages needed for this problem set. I added a few for you.
+
+
+```{r}
+library(tidyverse)
+library(moderndive)
+library(gglm)
+```
+
+
+# Part 1: Concepts
+
+## Problem 1: Bootstrap Samples
+*Based on ISLR Exercise 5.2*
+
+We investigate the probabilities that a given observation is or is not part of a bootstrap sample. Suppose that we take a bootstrap from a set of $n$ observations. Let $j$ be an arbitrary whole number between $1$ and $n$.
+
+a. What is the probability that the first bootstrap observation is *not* the $j$th observation from the original sample? Justify your answer.
+
+b. What is the probability that the second bootstrap observation is *not* the $j$th observation from the original sample?
+
+c. Argue that the probability that the $j$th observation is *not* in the bootstrap sample is $(1 - 1/n)^n$.
+
+d. Argue that the probability that the $j$th observation *is*  in the bootstrap sample is $1 - (1 - 1/n)^n$.
+
+e. For any value of $x$, we can express:
+$$
+e^x = \underset{n \rightarrow \infty}{\mathrm{lim}} \biggr( 1 + \frac{x}{n} \biggr)^n
+$$
+where $e$ is Euler's number. Using this formula, *approximate* the probability from part (c) that the $j$th observation is *not* in the bootstrap sample in terms of the constant $e$.
+
+f. For each of $n = 10, 100, 1000, 10000$, use (c) to calculate the probability that the $j$th observation is *not* in the bootstrap sample. Make a plot of $n$ (on the $x$-axis) vs. the corresponding probability (on the $y$-axis). Add a horizontal red dashed line at the value of your answer from part (e). Comment on the results of your plot. *NOTE: Using \texttt{R}, we can calculate $e^x$ for different values of $x$ by using the \texttt{exp()} function. For example, $e^5$ can be calculated using `exp(5)`*
+
+
+
+## Problem 2: Assessing Models
+
+For each of the three scenarios listed below, determine which of the following techniques would be most appropriate to implement in order to achieve the desired result. Briefly justify your answer.
+
+Techniques
+
+(i) Use a single randomly selected test set to estimate test MSE.
+(ii) Use the statistics $R^2$ and RSE to assess model accuracy.
+(iii) Use k-fold Cross Validation to estimate test MSE.
+(iv) Using bootstrapping to estimate a statistic's variance.
+(v) None of these methods are appropriate.
+
+Scenarios
+
+a. A statistics professor wants to create a model exploring the relationship between midterm exam scores and final exam scores. The professor has data for 100 students and is interested in finding the best of several polynomial models to predict final score as a function of midterm score.
+
+b. Researchers have built a model for house prices in the Woodstock neighborhood as a function of the house's square footage. They want to assess whether the non-zero correlation they see between house price and size is statistically significant, or is likely to have occurred by random chance.
+
+c. A data set contains observations on 50,000 samples of red and white wines from the north of Portugal. Researchers are interested in building a model to predict wine quality (on scale 1 - 10) based on physicochemical data for each sample. The researchers want to compare the performance of two complicated models, each of which takes significant time to code and compute.
+
+
+## Problem 3: Cross-Validation 
+*Based on ISLR Exercise 5.8*
+
+a. Use the following code chunk to generate a simulated data set. Then write out the explicit equation for the model used to generate the data.
+
+```{r}
+set.seed(1010) 
+x <- rnorm(50, 0, 1) ## Generates 50 variables from N(0,1)
+e <- rnorm(50,0, 1) ## Generates 50 errors from N(0,1)
+y <- 2 + x - 2*x^2 + e ##Specifies Y as a function of X plus errors
+sim_data<-data.frame(x,y) ## Creates a data frame of X and Y
+rm(x,e,y)
+```
+
+b. Create a scatterplot of X against Y. Describe the relationship observed. Calculate mean and standard deviation for each of X and Y, as well as the correlation between X and Y.
+
+c. Set a seed and compute leave-one-out (i.e., $n$-fold) cross validation errors from fitting each of the following 4 models using least squares:
+
+    i. $Y = \beta_0 + \beta_1 X + \epsilon$
+
+    ii. $Y = \beta_0 + \beta_1 X + \beta_2 X^2 + \epsilon$
+
+    iii. $Y = \beta_0 + \beta_1 X + \beta_2 X^2 + \beta_3 X^3 + \epsilon$
+
+    iv. $Y = \beta_0 + \beta_1 X +\beta_2 X^2 + \beta_3 X^3 + \beta_4 X^4 +  \epsilon$
+
+d. Repeat (c) using a different seed and report your results. Are they the same as from (c), or are they different? Explain why this occurred.
+
+e. Set a seed and compute $5$-fold CV from fitting each of models from (c).
+
+f. Repeat (e) using a different seed and report your results. Are they the same as from (e), or are they different? Explain why this occurred.
+
+g. Which of the models in (c) had the smallest leave-one-out cross-validation error? Explain why this makes sense.
+
+
+
+
+# Part 2: Regression Competition
+
+For all of this part of the Lab (Part 2: Regression Competition), you may not collaborate with others, except for Grayson and the course assistant. 
+
+
+## Problem 1
+
+Your objective is to build a multiple regression model **using the tools we have discussed in class** that predicts the price of a house in Ames, Iowa as a function of other characteristics of the house. You will construct your model using a training data set with information on 31 variables recorded for 150 houses. I've held back the data on 50 other houses; this will serve as the test data set for assessing the predictive accuracy of your model.
+
+You should record your answers in this file. However, you are welcome to use a separate file for scratchwork. This part is divided into several **Components** to help organize your work. 
+
+
+### The Data
+
+The data set `house` can be found in the data folder of this repo and can be loaded by running the following code.
+
+```{r}
+house <- read_csv("data/house_train.csv")
+```
+
+Additionally, the `data_description.txt` file in the data folder of this repo gives a full description of the variables appearing in the data set.
+
+There are two special columns of note: 
+
+- `SalePrice` is your response variable and should not be included as a predictor.
+
+- `Id` is a randomly assigned number uniquely identifying the house in the data set and should not be included as a predictor.
+
+
+### Components
+
+### Data Exploration
+
+In this section, you should perform preliminary data exploration and analysis.It would be a good idea to start off looking at the pairwise relationships between the response and the predictors (at least 3) you expect will be useful. 
+
+Do these relationships look strong/weak? Linear/non-linear? Does it seem like a transformation would be useful? Comment on any other relationships you find in the data. 
+
+
+
+### Model Building
+
+In this section, you should build a series of MLR models (at least 3) of varying complexity and that use a variety of the tools we have studied thus far. Explain why you choose to implement various features in each model. 
+
+
+
+### Model Diagnostics
+
+In this section, perform diagnostics on the models you are exploring. Does it appear your models satisfy the MLR modeling assumptions? If not, comment on the effect this might have on the accuracy of your model.
+
+
+
+### Model Selection
+
+In this section, compare the results of your models. Which models seemed to perform better or worse? Why? Be sure to consider the effect your choices may have on MSE based on the Bias-Variance trade-off.
+
+
+
+### Your model
+
+Identify the model you feel will be most accurate in predicting `SalePrice`. Copy the following template and modify to create an R function that takes an arbitrary housing data set as input and then outputs your model as an lm object called `my_mod`. 
+
+This function should be self-contained, so include any packages you need or data processing you use. I will input the test data and run in a separate .Rmd, so it is important it can stand alone.
+
+```{r}
+#Change the name of the function to your first and last name
+#Don't change the name of the input training_data
+
+FirstName_LastName_model <- function(training_data) { 
+  library(tidyverse)     ## Load whatever packages you need
+  training_data <- training_data %>% mutate(Id_neg = -Id)   ## Perform any data processing
+  my_mod <- lm(SalePrice ~ 1, data = training_data)    ## Create your model
+  my_mod      ##return your model as output
+}
+```
+
+
+To verify that your function is working as desired, run the following code (with your actual function name replacing `FirstName_Lastname_model`). The output should be your linear model.
+
+```{r}
+#| eval: false
+FirstName_LastName_model(house)
+```
+
+
+
+### Model Interpretation
+
+Interpret some of the coefficients in your model. Are there any coefficients or predictors that are surprising?
+
+
+
+### Conclusions
+
+Discuss some limitations of your methods and your model. Identify one variable **not** in the data set you feel could be an important predictor of `SalePrice`. How confident are you in the accuracy of your model? 
+
+
+
+
+
+
